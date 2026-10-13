@@ -5,8 +5,10 @@ WIDTH = 500
 HEIGHT = 350
 Game_over=False
 t = 10
+g = False
 questionfile = "Quiz Master/questions.txt"
 questions= []
+score = 0
 # Rectangle definitions
 question_box = Rect((20, 60), (370, 75))
 marqueue = Rect((10,15),(380,40))
@@ -14,7 +16,6 @@ answer_box1 = Rect((20, 140), (170, 75))
 answer_box2 = Rect((215, 140), (170, 75))
 answer_box3 = Rect((20, 230), (170, 75))
 answer_box4 = Rect((215, 230), (170, 75))
-
 timerbox = Rect((415, 60), (70, 75))
 skip_box = Rect((415, 140), (70, 165))
 def ReadFile():
@@ -24,11 +25,40 @@ def ReadFile():
     queuefile.close()
     print(questions)
 ReadFile()
+def ReadQuestion():
+    return questions.pop(0).split(",")
+questions1 = ReadQuestion()
 def MoveMarqueue():
     marqueue.x -= 2
     if marqueue.right <=0:
         marqueue.left = 750
+def GameOver():
+    g = True
+def on_mouse_down(pos):
+   global t, questions1, questions, score
+   index = 1
+   for box in [answer_box1, answer_box2, answer_box3, answer_box4]:
+        if box.collidepoint(pos):
+            if index == int(questions1[5]):
+                score += 1
+                if questions:
+                   questions1 = ReadQuestion()
+                   t = 10
+                else:
+                    GameOver()
+
+            else:
+                if questions:
+                    questions1 = ReadQuestion()
+                    t = 10
+        index+=1
+           
 def draw():
+    global g
+    if g:
+        screen.fill("black")
+        screen.draw.rect(f"Score is {score}/10 ", "white")
+
     screen.clear()
     screen.fill("black")
 
@@ -38,12 +68,14 @@ def draw():
 
     # Question box
     screen.draw.filled_rect(question_box, "darkblue")
-    screen.draw.text( "Game over!\nYou got 2 questions correct!",center=question_box.center,color="white",fontsize=24)
+    screen.draw.textbox(questions1[0] ,question_box,color="white")
 
     # Answer boxes
+    index = 1
     for box in [answer_box1, answer_box2, answer_box3, answer_box4]:
         screen.draw.filled_rect(box, "orange")
-        screen.draw.text("-",center=box.center,color="black",fontsize=50)
+        screen.draw.textbox(questions1[index],box,color="black")
+        index+=1
 
     # Score box
     screen.draw.filled_rect(timerbox, "yellow")
